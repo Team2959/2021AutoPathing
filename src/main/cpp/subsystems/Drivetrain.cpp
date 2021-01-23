@@ -37,6 +37,7 @@ void Drivetrain::SetVolts(units::volt_t left, units::volt_t right)
 {
     m_leftGroup.SetVoltage(left);
     m_rightGroup.SetVoltage(right);
+    m_differentialDrive.Feed();
 }
 
 void Drivetrain::CurvatureDrive(double speed, double rotation, bool quickTurn)
@@ -46,5 +47,10 @@ void Drivetrain::CurvatureDrive(double speed, double rotation, bool quickTurn)
 
 void Drivetrain::Periodic()
 {
-    
+    m_odometry.Update(GetRotation(), units::meter_t(m_leftEncoder.GetPosition()), units::meter_t(m_rightEncoder.GetPosition()));
+}
+
+frc::Rotation2d Drivetrain::GetRotation()
+{
+    return frc::Rotation2d{units::degree_t(RadiansToDegrees(m_navX.GetAngle())};
 }

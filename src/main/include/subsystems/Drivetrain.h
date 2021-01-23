@@ -58,4 +58,6 @@ public:
     double GetAngle();
     double GetPosition();
     void SetVolts(units::volt_t left, units::volt_t right); 
+    frc::Rotation2d GetRotation();
+    frc::Pose2d GetPose();
 };
