@@ -8,9 +8,9 @@
 #pragma once
 
 #include <frc2/command/Command.h>
-
-#include "commands/ExampleCommand.h"
-#include "subsystems/ExampleSubsystem.h"
+#include <subsystems/Drivetrain.h>
+#include "OI.h"
+#include "commands/TeleopDriveCommand.h"
 
 /**
  * This class is where the bulk of the robot should be declared.  Since
@@ -19,7 +19,8 @@
  * scheduler calls).  Instead, the structure of the robot (including subsystems,
  * commands, and button mappings) should be declared here.
  */
-class RobotContainer {
+class RobotContainer
+{
  public:
   RobotContainer();
 
@@ -27,8 +28,10 @@ class RobotContainer {
 
  private:
   // The robot's subsystems and commands are defined here...
-  ExampleSubsystem m_subsystem;
-  ExampleCommand m_autonomousCommand;
+  Drivetrain m_drivetrain;
+  OI m_oi;
+
+  TeleopDriveCommand m_defaultDriveCommand {&m_drivetrain, &m_oi};
 
   void ConfigureButtonBindings();
 };
