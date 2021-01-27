@@ -14,9 +14,9 @@
 class FollowPathCommand : public frc2::CommandHelper<frc2::CommandBase, FollowPathCommand>
 {
 public:
-    FollowPathCommand(Drivetrain* drivetrain, wpi::SmallString<64> path);
+    FollowPathCommand(Drivetrain & drivetrain, wpi::SmallString<64> path);
     void Initialize() override;
 private:
     wpi::SmallString<64> m_path;
-    Drivetrain* m_drivetrain;
+    Drivetrain & m_drivetrain;
 };

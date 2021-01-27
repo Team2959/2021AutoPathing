@@ -6,8 +6,10 @@
 /*----------------------------------------------------------------------------*/
 
 #include "RobotContainer.h"
+#include "commands/IntakeSpeedCommand.h"
 
-RobotContainer::RobotContainer() {
+RobotContainer::RobotContainer()
+{
   // Initialize all of your commands and subsystems here
   m_drivetrain.SetDefaultCommand(m_defaultDriveCommand);
 
@@ -15,22 +17,13 @@ RobotContainer::RobotContainer() {
   ConfigureButtonBindings();
 }
 
-void RobotContainer::ConfigureButtonBindings() {
+void RobotContainer::ConfigureButtonBindings()
+{
   // Configure your button bindings here
+  m_oi.m_intakeSpeedButton.WhenHeld(IntakeSpeedCommand(m_intake, 0.75));
 }
 
 frc2::Command* RobotContainer::GetAutonomousCommand() {
   // An example command will be run in autonomous
   return nullptr;
-}
-
-void RobotContainer::CommandIntake()
-{
-  auto speed = 0.0;
-  if (m_oi.m_driverJoystick.GetRawButton(1))
-  {
-    speed = 0.75;
-  }
-
-  m_intake.SetSpeed(speed);
 }

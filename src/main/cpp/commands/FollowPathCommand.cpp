@@ -3,7 +3,7 @@
 #include <frc/controller/RamseteController.h>
 #include <frc/controller/PIDController.h>
 
-FollowPathCommand::FollowPathCommand(Drivetrain* drivetrain, wpi::SmallString<64> path)
+FollowPathCommand::FollowPathCommand(Drivetrain & drivetrain, wpi::SmallString<64> path)
     : m_drivetrain(drivetrain), m_path(path)
 {
 }
