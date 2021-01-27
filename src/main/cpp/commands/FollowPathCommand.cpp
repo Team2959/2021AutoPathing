@@ -1,8 +1,10 @@
 
 #include <commands/FollowPathCommand.h>
+#include <frc/controller/RamseteController.h>
+#include <frc/controller/PIDController.h>
 
-FollowPathCommand::FollowPathCommand(wpi::SmallString<64> path)
-    : m_path(path)
+FollowPathCommand::FollowPathCommand(Drivetrain* drivetrain, wpi::SmallString<64> path)
+    : m_drivetrain(drivetrain), m_path(path)
 {
 }
 
@@ -14,4 +16,6 @@ void FollowPathCommand::Initialize()
     wpi::sys::path::append(deployDirectory, m_path);
 
     frc::Trajectory trajectory = frc::TrajectoryUtil::FromPathweaverJson(deployDirectory);
+    
+
 }

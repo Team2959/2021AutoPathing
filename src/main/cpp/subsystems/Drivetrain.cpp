@@ -52,5 +52,5 @@ void Drivetrain::Periodic()
 
 frc::Rotation2d Drivetrain::GetRotation()
 {
-    return frc::Rotation2d{units::degree_t(RadiansToDegrees(m_navX.GetAngle())};
+    return frc::Rotation2d(units::angle::degree_t(RadiansToDegrees(m_navX.GetAngle())));
 }

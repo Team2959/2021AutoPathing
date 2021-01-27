@@ -9,6 +9,7 @@
 
 #include <frc2/command/Command.h>
 #include <subsystems/Drivetrain.h>
+#include <subsystems/Intake.h>
 #include "OI.h"
 #include "commands/TeleopDriveCommand.h"
 
@@ -26,9 +27,12 @@ class RobotContainer
 
   frc2::Command* GetAutonomousCommand();
 
+  void CommandIntake();
+
  private:
   // The robot's subsystems and commands are defined here...
   Drivetrain m_drivetrain;
+  Intake m_intake;
   OI m_oi;
 
   TeleopDriveCommand m_defaultDriveCommand {&m_drivetrain, &m_oi};

@@ -23,3 +23,14 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
   // An example command will be run in autonomous
   return nullptr;
 }
+
+void RobotContainer::CommandIntake()
+{
+  auto speed = 0.0;
+  if (m_oi.m_driverJoystick.GetRawButton(1))
+  {
+    speed = 0.75;
+  }
+
+  m_intake.SetSpeed(speed);
+}
