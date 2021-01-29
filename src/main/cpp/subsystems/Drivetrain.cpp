@@ -54,3 +54,16 @@ frc::Rotation2d Drivetrain::GetRotation()
 {
     return frc::Rotation2d(units::angle::degree_t(RadiansToDegrees(m_navX.GetAngle())));
 }
+
+frc::DifferentialDriveWheelSpeeds Drivetrain::GetWheelSpeeds()
+{
+    return{
+        units::meters_per_second_t(m_leftEncoder.GetVelocity()),
+        units::meters_per_second_t(m_rightEncoder.GetVelocity())
+    };
+}
+
+frc::Pose2d Drivetrain::GetPose()
+{
+    return m_odometry.GetPose();
+}

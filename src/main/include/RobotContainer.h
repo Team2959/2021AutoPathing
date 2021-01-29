@@ -13,6 +13,8 @@
 #include "OI.h"
 #include "commands/TeleopDriveCommand.h"
 
+#include <wpi/SmallString.h>
+
 /**
  * This class is where the bulk of the robot should be declared.  Since
  * Command-based is a "declarative" paradigm, very little robot logic should
@@ -27,11 +29,14 @@ class RobotContainer
 
   frc2::Command* GetAutonomousCommand();
 
+  frc2::Command* GetPathingCommand(wpi::SmallString<64> name);
+
  private:
   // The robot's subsystems and commands are defined here...
   Drivetrain m_drivetrain;
   Intake m_intake;
   OI m_oi;
+  
 
   TeleopDriveCommand m_defaultDriveCommand {m_drivetrain, m_oi.m_driverJoystick};
 

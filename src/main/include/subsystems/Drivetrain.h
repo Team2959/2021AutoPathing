@@ -45,6 +45,8 @@ private:
     void SetupSparkMax(rev::CANSparkMax* controller);
 
 public:
+    const units::meter_t kTrackwidth = 0.69_m;
+    const frc::DifferentialDriveKinematics kDriveKinematics{kTrackwidth};
     Drivetrain();
 
     void CurvatureDrive(double speed, double rotation, bool quickTurn);
@@ -60,4 +62,5 @@ public:
     void SetVolts(units::volt_t left, units::volt_t right); 
     frc::Rotation2d GetRotation();
     frc::Pose2d GetPose();
+    frc::DifferentialDriveWheelSpeeds GetWheelSpeeds();
 };

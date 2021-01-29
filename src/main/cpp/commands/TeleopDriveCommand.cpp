@@ -5,6 +5,12 @@ TeleopDriveCommand::TeleopDriveCommand(Drivetrain & drivetrain, frc::Joystick & 
  : m_drivetrain(drivetrain), m_driveJoystick(driveJoystick)
 {
     AddRequirements({&m_drivetrain});
+    m_conditioning.SetDeadband(.1);
+    m_conditioning.SetExponent(2.5);
+    m_conditioning.SetRange(0.0, 1.0);
+    m_turnCondiditioning.SetDeadband(.15);
+    m_turnCondiditioning.SetExponent(2.5);
+    m_turnCondiditioning.SetRange(0.0, 1.0);
 }
 
 void TeleopDriveCommand::Execute() 
