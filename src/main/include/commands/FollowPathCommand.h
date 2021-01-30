@@ -17,6 +17,6 @@ public:
     FollowPathCommand(Drivetrain & drivetrain, wpi::SmallString<64> path);
     void Initialize() override;
 private:
-    wpi::SmallString<64> m_path;
     Drivetrain & m_drivetrain;
+    wpi::SmallString<64> m_path;
 };
