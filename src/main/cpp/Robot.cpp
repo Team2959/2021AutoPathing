@@ -10,7 +10,10 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc2/command/CommandScheduler.h>
 
-void Robot::RobotInit() {}
+void Robot::RobotInit() {
+  frc::SmartDashboard::PutString("Path", "");
+
+}
 
 /**
  * This function is called every robot packet, no matter the mode. Use
@@ -20,7 +23,10 @@ void Robot::RobotInit() {}
  * <p> This runs after the mode specific periodic functions, but before
  * LiveWindow and SmartDashboard integrated updating.
  */
-void Robot::RobotPeriodic() { frc2::CommandScheduler::GetInstance().Run(); }
+void Robot::RobotPeriodic() { 
+  m_container.RobotPeriodic();
+  frc2::CommandScheduler::GetInstance().Run(); 
+}
 
 /**
  * This function is called once each time the robot enters Disabled mode. You
@@ -36,7 +42,11 @@ void Robot::DisabledPeriodic() {}
  * RobotContainer} class.
  */
 void Robot::AutonomousInit() {
-  m_autonomousCommand = m_container.GetAutonomousCommand();
+  std::string file = frc::SmartDashboard::GetString("Path", "none");
+  wpi::Twine twine{file};
+  wpi::SmallString<64> smallString;
+  twine.toVector(smallString);
+  m_autonomousCommand = m_container.GetPathingCommand(smallString);
 
   if (m_autonomousCommand != nullptr) {
     m_autonomousCommand->Schedule();

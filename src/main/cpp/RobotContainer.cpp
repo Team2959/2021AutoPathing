@@ -27,6 +27,11 @@ RobotContainer::RobotContainer()
   ConfigureButtonBindings();
 }
 
+void RobotContainer::RobotPeriodic()
+{
+  m_drivetrain.Periodic();
+}
+
 void RobotContainer::ConfigureButtonBindings()
 {
   // Configure your button bindings here
@@ -40,12 +45,11 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
 
 frc2::Command* RobotContainer::GetPathingCommand(wpi::SmallString<64> name)
 {
-    wpi::SmallString<64> deployDirectory;
-    frc::filesystem::GetDeployDirectory(deployDirectory);
-    wpi::sys::path::append(deployDirectory, "paths");
-    wpi::sys::path::append(deployDirectory, name);
-
-    frc::Trajectory trajectory = frc::TrajectoryUtil::FromPathweaverJson(deployDirectory);
+  wpi::SmallString<64> deployDirectory;
+  frc::filesystem::GetDeployDirectory(deployDirectory);
+  wpi::sys::path::append(deployDirectory, "paths");
+  wpi::sys::path::append(deployDirectory, name);
+  frc::Trajectory trajectory = frc::TrajectoryUtil::FromPathweaverJson(deployDirectory);  
 
   frc2::RamseteCommand* ramseteCommand = new frc2::RamseteCommand(
       trajectory, [this]() { return m_drivetrain.GetPose(); },
@@ -59,5 +63,8 @@ frc2::Command* RobotContainer::GetPathingCommand(wpi::SmallString<64> name)
       frc2::PIDController(Drive::kPDriveVel, 0, 0),
       [this](auto left, auto right) { m_drivetrain.SetVolts(left, right); },
       {&m_drivetrain});
+
+  m_drivetrain.ResetOdometry(trajectory.InitialPose(), frc::Rotation2d{units::degree_t(m_drivetrain.GetAngle())});
+
   return ramseteCommand;
 }

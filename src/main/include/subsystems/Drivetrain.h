@@ -13,6 +13,8 @@
 
 #include <rev/CANSparkMax.h>
 
+#include <fstream>
+
 class Drivetrain : public frc2::SubsystemBase
 {
 private:
@@ -45,6 +47,11 @@ private:
 
     void SetupSparkMax(rev::CANSparkMax* controller);
 
+    std::fstream m_logFile{};
+
+    const int kLogInterval = 100;
+    int m_steps = 0;
+
 public:
     Drivetrain();
 
@@ -58,6 +65,7 @@ public:
     double GetAngle();
     double GetPosition();
     void SetVolts(units::volt_t left, units::volt_t right); 
+    void ResetOdometry(frc::Pose2d pose, frc::Rotation2d rotation);
     frc::Rotation2d GetRotation();
     frc::Pose2d GetPose();
     frc::DifferentialDriveWheelSpeeds GetWheelSpeeds();

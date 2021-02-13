@@ -90,12 +90,15 @@ const int kReverseConveyor = 7;
 const int kReverseKicker = 6;
 const int kTurnToTarget = 4;
 
+const double kGearboxRatio = 1.0 / 6.1; // One turn of the wheel is 6.1 turns of the motor
+const double kConversionFactor = kGearboxRatio * 6 * M_PI * 0.0254; // pi * wheel diameter * inches to meters
+
 namespace Drive 
 {
     const double kRamseteB = 2;
     const double kRamseteZeta = 0.7;
-    const auto ks = 0.22_V;
-    const auto kv = 1.98 * 1_V * 1_s / 1_m;
-    const auto ka = 0.2 * 1_V * 1_s * 1_s / 1_m;
+    const auto ks = 0.157_V;
+    const auto kv = 1.54 * 1_V * 1_s / 1_m;
+    const auto ka = 0.273 * 1_V * 1_s * 1_s / 1_m;
     const double kPDriveVel = 8.5;
 }
