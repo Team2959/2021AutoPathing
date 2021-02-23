@@ -16,10 +16,14 @@ Drivetrain::Drivetrain()
     m_rightPrimary.SetInverted(false);
     m_differentialDrive.SetRightSideInverted(true);
 
-    m_leftEncoder.SetPositionConversionFactor(-kConversionFactor);
-    m_rightEncoder.SetPositionConversionFactor(kConversionFactor);
-    m_leftEncoder.SetVelocityConversionFactor(-kConversionFactor / 60.0);
-    m_rightEncoder.SetVelocityConversionFactor(kConversionFactor / 60.0);
+    // m_leftEncoder.SetPositionConversionFactor(-kConversionFactor);
+    // m_rightEncoder.SetPositionConversionFactor(kConversionFactor);
+    // m_leftEncoder.SetVelocityConversionFactor(-kConversionFactor / 60.0);
+    // m_rightEncoder.SetVelocityConversionFactor(kConversionFactor / 60.0);
+    m_leftEncoder.SetPositionConversionFactor(1.0);
+    m_rightEncoder.SetPositionConversionFactor(1.0);
+    m_leftEncoder.SetVelocityConversionFactor(1.0);
+    m_rightEncoder.SetVelocityConversionFactor(1.0);
 
     std::string filename = "/home/lvuser/odometry.csv";
     char buf[100];
@@ -29,7 +33,7 @@ Drivetrain::Drivetrain()
     {
         std::cout << "Log File failed to open" << std::endl;
     }
-    m_logFile << "rotation,left,right,positionX,positionY\n" << std::flush;
+    m_logFile << "rawLeft,rawRight,rawAngle,left,right,rotation,positionX,positionY,rawLeftVelocity,rawRightVelocity,leftVelocity,rightVelocity\n" << std::flush;
 
     SetupSparkMax(&m_leftPrimary);
     SetupSparkMax(&m_rightPrimary);
@@ -62,17 +66,31 @@ void Drivetrain::CurvatureDrive(double speed, double rotation, bool quickTurn)
 void Drivetrain::Periodic()
 {
     auto rot = GetRotation();
-    auto left = units::meter_t(m_leftEncoder.GetPosition());
-    auto right = units::meter_t(m_rightEncoder.GetPosition());
+    auto rawLeft = m_leftEncoder.GetPosition();
+    auto rawRight = m_rightEncoder.GetPosition();
+    auto left = units::meter_t(rawLeft * kConversionFactor);
+    auto right = units::meter_t(rawRight * kConversionFactor);
     auto pos = m_odometry.Update(rot, left, right);
+    auto rawLeftV = m_leftEncoder.GetVelocity();
+    auto rawRightV = m_rightEncoder.GetVelocity();
+    auto leftV = units::meters_per_second_t(rawLeftV * kConversionFactor / 60.0);
+    auto rightV = units::meters_per_second_t(rawRightV * kConversionFactor / 60.0);
     if((m_steps % kLogInterval) == 0)
     {
         m_logFile 
-            << std::to_string(double(rot.Degrees())) << ","
+            << std::to_string(rawLeft) << ","
+            << std::to_string(rawRight) << ","
+            << std::to_string(m_navX.GetAngle()) << ","
             << std::to_string(double(left)) << ","
             << std::to_string(double(right)) << ","
+            << std::to_string(double(rot.Degrees())) << ","
             << std::to_string(double(pos.X())) << ","
-            << std::to_string(double(pos.Y())) << "\n";
+            << std::to_string(double(pos.Y())) << ","
+            << std::to_string(rawLeftV) << ","
+            << std::to_string(rawRightV) << ","
+            << std::to_string(double(leftV)) << ","
+            << std::to_string(double(rightV)) << ","
+            << "\n";
         m_logFile.flush();
     }
     m_steps++;
@@ -90,9 +108,13 @@ frc::Rotation2d Drivetrain::GetRotation()
 
 frc::DifferentialDriveWheelSpeeds Drivetrain::GetWheelSpeeds()
 {
+    auto rawLeftV = m_leftEncoder.GetVelocity();
+    auto rawRightV = m_rightEncoder.GetVelocity();
+    auto leftV = rawLeftV * kConversionFactor / 60.0;
+    auto rightV = rawRightV * kConversionFactor / 60.0;
     return{
-        units::meters_per_second_t(m_leftEncoder.GetVelocity()),
-        units::meters_per_second_t(m_rightEncoder.GetVelocity())
+        units::meters_per_second_t(leftV),
+        units::meters_per_second_t(rightV)
     };
 }
 
