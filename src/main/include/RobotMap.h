@@ -72,6 +72,8 @@ const int kColorWheelEngagePcmId = 1;
 const int kNewPowercellSensor = 0;
 const int kSecuredPowercellSensor = 1;
 const int kKickerSensor = 2;
+const int kIntakeLeftFeederSensor = 4;
+const int kIntakeRightFeederSensor = 3;
 
 // Joystick Buttons
 // driver
@@ -90,9 +92,6 @@ const int kReverseConveyor = 7;
 const int kReverseKicker = 6;
 const int kTurnToTarget = 4;
 
-const double kGearboxRatio = 1.0 / 6.1; // One turn of the wheel is 6.1 turns of the motor
-const double kConversionFactor = kGearboxRatio * 6 * M_PI * 0.0254; // pi * wheel diameter * inches to meters
-
 namespace Drive 
 {
     const double kRamseteB = 2;
@@ -101,4 +100,7 @@ namespace Drive
     const auto kv = 1.54 * 1_V * 1_s / 1_m;
     const auto ka = 0.273 * 1_V * 1_s * 1_s / 1_m;
     const double kPDriveVel = 8.5;
+    const double kI = 0.0;
+    constexpr auto kMaxSpeed = 3_mps;
+    constexpr auto kMaxAcceleration = 3_mps_sq;
 }

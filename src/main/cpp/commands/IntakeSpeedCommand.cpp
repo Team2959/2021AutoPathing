@@ -8,10 +8,10 @@ IntakeSpeedCommand::IntakeSpeedCommand(Intake & intake, double targetSpeed)
 
 void IntakeSpeedCommand::Initialize()
 {
-    m_intake.SetSpeed(m_targetSpeed);
+    m_intake.SetIntakeSpeed(m_targetSpeed);
 }
 
 void IntakeSpeedCommand::End(bool interrupted)
 {
-    m_intake.SetSpeed(0);
+    m_intake.SetIntakeSpeed(0);
 }

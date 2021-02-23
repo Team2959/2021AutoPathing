@@ -12,7 +12,7 @@
 
 void Robot::RobotInit() {
   frc::SmartDashboard::PutString("Path", "");
-
+  m_container.RobotInit();
 }
 
 /**
@@ -24,7 +24,6 @@ void Robot::RobotInit() {
  * LiveWindow and SmartDashboard integrated updating.
  */
 void Robot::RobotPeriodic() { 
-  m_container.RobotPeriodic();
   frc2::CommandScheduler::GetInstance().Run(); 
 }
 
@@ -47,6 +46,10 @@ void Robot::AutonomousInit() {
   wpi::SmallString<64> smallString;
   twine.toVector(smallString);
   m_autonomousCommand = m_container.GetPathingCommand(smallString);
+  if(m_autonomousCommand == nullptr)
+  {
+    m_autonomousCommand = m_container.GetAutonomousCommand();
+  }
 
   if (m_autonomousCommand != nullptr) {
     m_autonomousCommand->Schedule();

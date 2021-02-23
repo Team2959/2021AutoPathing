@@ -2,13 +2,8 @@
 #include <Robot.h>
 
 #include <ctime>
+#include <unistd.h>
 
-bool FileExists(std::string filename)
-{
-    std::ifstream file;
-    file.open(filename);
-    return file.good();
-}
 
 Drivetrain::Drivetrain()
 {
@@ -21,17 +16,20 @@ Drivetrain::Drivetrain()
     m_rightPrimary.SetInverted(false);
     m_differentialDrive.SetRightSideInverted(true);
 
-    m_leftEncoder.SetPositionConversionFactor(kConversionFactor);
+    m_leftEncoder.SetPositionConversionFactor(-kConversionFactor);
     m_rightEncoder.SetPositionConversionFactor(kConversionFactor);
+    m_leftEncoder.SetVelocityConversionFactor(-kConversionFactor / 60.0);
+    m_rightEncoder.SetVelocityConversionFactor(kConversionFactor / 60.0);
 
-    std::string filename;
-    for(int i = 0; ; i++)
-    {
-        filename = std::string("odometry") + std::to_string(i) + std::string(".csv");
-        if(!FileExists(filename)) break;
-    }
+    std::string filename = "/home/lvuser/odometry.csv";
+    char buf[100];
+    std::cout << std::string(getcwd(buf, 100)) << filename << std::endl;
     m_logFile.open(filename);
-    m_logFile << "rotation,left,right,positionX,positionY\n";
+    if(!m_logFile.good() || !m_logFile.is_open())
+    {
+        std::cout << "Log File failed to open" << std::endl;
+    }
+    m_logFile << "rotation,left,right,positionX,positionY\n" << std::flush;
 
     SetupSparkMax(&m_leftPrimary);
     SetupSparkMax(&m_rightPrimary);
@@ -47,11 +45,6 @@ void Drivetrain::SetupSparkMax(rev::CANSparkMax* controller)
     controller->SetIdleMode(rev::CANSparkMax::IdleMode::kBrake);
     controller->SetSmartCurrentLimit(kCurrentLimit);
     controller->SetOpenLoopRampRate(kOpenLoopRampRate);
-}
-
-double Drivetrain::GetAngle() // units::degree_t
-{
-    return m_navX.GetAngle();
 }
 
 void Drivetrain::SetVolts(units::volt_t left, units::volt_t right)
@@ -80,13 +73,19 @@ void Drivetrain::Periodic()
             << std::to_string(double(right)) << ","
             << std::to_string(double(pos.X())) << ","
             << std::to_string(double(pos.Y())) << "\n";
+        m_logFile.flush();
     }
     m_steps++;
 }
 
+double Drivetrain::GetAngle() // units::degree_t
+{
+    return m_navX.GetAngle();
+}
+
 frc::Rotation2d Drivetrain::GetRotation()
 {
-    return frc::Rotation2d(units::angle::degree_t(RadiansToDegrees(m_navX.GetAngle())));
+    return m_navX.GetRotation2d();
 }
 
 frc::DifferentialDriveWheelSpeeds Drivetrain::GetWheelSpeeds()

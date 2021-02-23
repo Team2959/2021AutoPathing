@@ -17,6 +17,21 @@
 #include <frc2/command/RamseteCommand.h>
 #include <wpi/Path.h>
 #include <wpi/SmallString.h>
+#include <frc/trajectory/Trajectory.h>
+#include <frc/trajectory/TrajectoryGenerator.h>
+#include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
+#include <frc2/command/InstantCommand.h>
+#include <frc2/command/RamseteCommand.h>
+#include <frc2/command/SequentialCommandGroup.h>
+#include <frc2/command/button/JoystickButton.h>
+#include <fstream>
+
+bool FileExists(std::string filename)
+{
+  std::fstream check;
+  check.open(filename);
+  return check.is_open();
+}
 
 RobotContainer::RobotContainer()
 {
@@ -27,9 +42,9 @@ RobotContainer::RobotContainer()
   ConfigureButtonBindings();
 }
 
-void RobotContainer::RobotPeriodic()
+void RobotContainer::RobotInit()
 {
-  m_drivetrain.Periodic();
+  m_intake.OnRobotInit();
 }
 
 void RobotContainer::ConfigureButtonBindings()
@@ -39,20 +54,33 @@ void RobotContainer::ConfigureButtonBindings()
 }
 
 frc2::Command* RobotContainer::GetAutonomousCommand() {
-  // An example command will be run in autonomous
-  return nullptr;
-}
+  // Create a voltage constraint to ensure we don't accelerate too fast
+  frc::DifferentialDriveVoltageConstraint autoVoltageConstraint(
+      frc::SimpleMotorFeedforward<units::meters>(
+          Drive::ks, Drive::kv, Drive::ka),
+      m_drivetrain.kDriveKinematics, 10_V);
 
-frc2::Command* RobotContainer::GetPathingCommand(wpi::SmallString<64> name)
-{
-  wpi::SmallString<64> deployDirectory;
-  frc::filesystem::GetDeployDirectory(deployDirectory);
-  wpi::sys::path::append(deployDirectory, "paths");
-  wpi::sys::path::append(deployDirectory, name);
-  frc::Trajectory trajectory = frc::TrajectoryUtil::FromPathweaverJson(deployDirectory);  
+  // Set up config for trajectory
+  frc::TrajectoryConfig config(Drive::kMaxSpeed,
+                               Drive::kMaxAcceleration);
+  // Add kinematics to ensure max speed is actually obeyed
+  config.SetKinematics(m_drivetrain.kDriveKinematics);
+  // Apply the voltage constraint
+  config.AddConstraint(autoVoltageConstraint);
 
-  frc2::RamseteCommand* ramseteCommand = new frc2::RamseteCommand(
-      trajectory, [this]() { return m_drivetrain.GetPose(); },
+  // An example trajectory to follow.  All units in meters.
+  auto exampleTrajectory = frc::TrajectoryGenerator::GenerateTrajectory(
+      // Start at the origin facing the +X direction
+      frc::Pose2d(0_m, 0_m, frc::Rotation2d(0_deg)),
+      // Pass through these two interior waypoints, making an 's' curve path
+      {frc::Translation2d(1_m, 1_m), frc::Translation2d(2_m, -1_m)},
+      // End 3 meters straight ahead of where we started, facing forward
+      frc::Pose2d(3_m, 0_m, frc::Rotation2d(0_deg)),
+      // Pass the config
+      config);
+
+  frc2::RamseteCommand ramseteCommand(
+      exampleTrajectory, [this]() { return m_drivetrain.GetPose(); },
       frc::RamseteController(Drive::kRamseteB,
                              Drive::kRamseteZeta),
       frc::SimpleMotorFeedforward<units::meters>(
@@ -64,7 +92,44 @@ frc2::Command* RobotContainer::GetPathingCommand(wpi::SmallString<64> name)
       [this](auto left, auto right) { m_drivetrain.SetVolts(left, right); },
       {&m_drivetrain});
 
-  m_drivetrain.ResetOdometry(trajectory.InitialPose(), frc::Rotation2d{units::degree_t(m_drivetrain.GetAngle())});
+  // Reset odometry to the starting pose of the trajectory.
+  m_drivetrain.ResetOdometry(exampleTrajectory.InitialPose(), m_drivetrain.GetRotation());
 
-  return ramseteCommand;
+  // no auto
+  return new frc2::SequentialCommandGroup(
+      std::move(ramseteCommand),
+      frc2::InstantCommand([this] { m_drivetrain.SetVolts(0_V, 0_V); }, {}));
+}
+
+frc2::Command* RobotContainer::GetPathingCommand(wpi::SmallString<64> name)
+{
+  wpi::SmallString<64> deployDirectory;
+  frc::filesystem::GetDeployDirectory(deployDirectory);
+  wpi::sys::path::append(deployDirectory, "paths");
+  wpi::sys::path::append(deployDirectory, name);
+  if(!FileExists(std::string(deployDirectory.c_str())))
+  {
+    return nullptr;
+  }
+  frc::Trajectory trajectory = frc::TrajectoryUtil::FromPathweaverJson(deployDirectory);  
+
+  frc2::RamseteCommand ramseteCommand = frc2::RamseteCommand(
+      trajectory, [this]() { return m_drivetrain.GetPose(); },
+      frc::RamseteController(Drive::kRamseteB,
+                             Drive::kRamseteZeta),
+      frc::SimpleMotorFeedforward<units::meters>(
+          Drive::ks, Drive::kv, Drive::ka),
+      m_drivetrain.kDriveKinematics,
+      [this] { return m_drivetrain.GetWheelSpeeds(); },
+      frc2::PIDController(Drive::kPDriveVel, Drive::kI, 0),
+      frc2::PIDController(Drive::kPDriveVel, Drive::kI, 0),
+      [this](auto left, auto right) { m_drivetrain.SetVolts(left, right); },
+      {&m_drivetrain});
+
+  m_drivetrain.ResetOdometry(trajectory.InitialPose(), m_drivetrain.GetRotation());
+
+  return new frc2::SequentialCommandGroup(
+    std::move(ramseteCommand),
+    frc2::InstantCommand([this] { m_drivetrain.SetVolts(0_V, 0_V); })
+  );
 }

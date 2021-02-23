@@ -31,7 +31,7 @@ class RobotContainer
 
   frc2::Command* GetPathingCommand(wpi::SmallString<64> name);
 
-  void RobotPeriodic();
+  void RobotInit();
  private:
   // The robot's subsystems and commands are defined here...
   Drivetrain m_drivetrain;
@@ -43,3 +43,6 @@ class RobotContainer
 
   void ConfigureButtonBindings();
 };
+
+
+bool FileExists(std::string filename);

@@ -42,14 +42,17 @@ private:
     frc::DifferentialDrive m_differentialDrive {m_leftGroup, m_rightGroup};
 
     AHRS m_navX{frc::SPI::kMXP};
-    frc::DifferentialDriveOdometry m_odometry{frc::Rotation2d{static_cast<units::radian_t>(RadiansToDegrees(m_navX.GetAngle()))}};
+    frc::DifferentialDriveOdometry m_odometry{m_navX.GetRotation2d()};
+
     const units::meter_t kTrackwidth = 0.69_m;
+    const double kGearboxRatio = 1.0 / 8.7; // One turn of the wheel is 8.7 turns of the motor
+    const double kConversionFactor = kGearboxRatio * 6 * M_PI * 0.0254; // pi * wheel diameter * inches to meters
 
     void SetupSparkMax(rev::CANSparkMax* controller);
 
     std::fstream m_logFile{};
 
-    const int kLogInterval = 100;
+    const int kLogInterval = 10;
     int m_steps = 0;
 
 public:
