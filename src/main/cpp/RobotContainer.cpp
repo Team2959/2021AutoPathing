@@ -93,7 +93,7 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
       {&m_drivetrain});
 
   // Reset odometry to the starting pose of the trajectory.
-  m_drivetrain.ResetOdometry(exampleTrajectory.InitialPose(), m_drivetrain.GetRotation());
+  m_drivetrain.ResetOdometry(exampleTrajectory.InitialPose());
 
   // no auto
   return new frc2::SequentialCommandGroup(
@@ -103,14 +103,15 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
 
 frc2::Command* RobotContainer::GetPathingCommand(wpi::SmallString<64> name)
 {
-  wpi::SmallString<64> deployDirectory;
+  wpi::SmallString<128> deployDirectory;
   frc::filesystem::GetDeployDirectory(deployDirectory);
   wpi::sys::path::append(deployDirectory, "paths");
   wpi::sys::path::append(deployDirectory, name);
-  if(!FileExists(std::string(deployDirectory.c_str())))
-  {
-    return nullptr;
-  }
+  std::cout << deployDirectory << std::endl;
+  // if(!FileExists(std::string(deployDirectory.c_str())))
+  // {
+  //   return nullptr;
+  // }
   frc::Trajectory trajectory = frc::TrajectoryUtil::FromPathweaverJson(deployDirectory);  
 
   frc2::RamseteCommand ramseteCommand = frc2::RamseteCommand(
@@ -126,7 +127,7 @@ frc2::Command* RobotContainer::GetPathingCommand(wpi::SmallString<64> name)
       [this](auto left, auto right) { m_drivetrain.SetVolts(left, right); },
       {&m_drivetrain});
 
-  m_drivetrain.ResetOdometry(trajectory.InitialPose(), m_drivetrain.GetRotation());
+  m_drivetrain.ResetOdometry(trajectory.InitialPose());
 
   return new frc2::SequentialCommandGroup(
     std::move(ramseteCommand),

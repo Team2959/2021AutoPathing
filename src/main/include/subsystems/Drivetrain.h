@@ -68,7 +68,7 @@ public:
     double GetAngle();
     double GetPosition();
     void SetVolts(units::volt_t left, units::volt_t right); 
-    void ResetOdometry(frc::Pose2d pose, frc::Rotation2d rotation);
+    void ResetOdometry(frc::Pose2d pose);
     frc::Rotation2d GetRotation();
     frc::Pose2d GetPose();
     frc::DifferentialDriveWheelSpeeds GetWheelSpeeds();

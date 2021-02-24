@@ -19,4 +19,5 @@ void TeleopDriveCommand::Execute()
         m_conditioning.Condition(-m_driveJoystick.GetY()),
         m_conditioning.Condition(m_driveJoystick.GetTwist()),
         m_driveJoystick.GetRawButton(kQuickTurn));
+    m_drivetrain.Periodic();
 }

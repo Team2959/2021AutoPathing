@@ -45,6 +45,7 @@ void Robot::AutonomousInit() {
   wpi::Twine twine{file};
   wpi::SmallString<64> smallString;
   twine.toVector(smallString);
+  std::cout << smallString << std::endl;
   m_autonomousCommand = m_container.GetPathingCommand(smallString);
   if(m_autonomousCommand == nullptr)
   {

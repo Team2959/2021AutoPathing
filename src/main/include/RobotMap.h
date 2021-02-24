@@ -101,6 +101,6 @@ namespace Drive
     const auto ka = 0.273 * 1_V * 1_s * 1_s / 1_m;
     const double kPDriveVel = 8.5;
     const double kI = 0.0;
-    constexpr auto kMaxSpeed = 3_mps;
-    constexpr auto kMaxAcceleration = 3_mps_sq;
+    constexpr auto kMaxSpeed = 1_mps;
+    constexpr auto kMaxAcceleration = 0.5_mps_sq;
 }
