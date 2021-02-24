@@ -96,10 +96,10 @@ namespace Drive
 {
     const double kRamseteB = 2;
     const double kRamseteZeta = 0.7;
-    const auto ks = 0.157_V;
-    const auto kv = 1.54 * 1_V * 1_s / 1_m;
-    const auto ka = 0.273 * 1_V * 1_s * 1_s / 1_m;
-    const double kPDriveVel = 8.5;
+    const auto ks = 0.161_V;
+    const auto kv = 2.25 * 1_V * 1_s / 1_m;
+    const auto ka = 0.366 * 1_V * 1_s * 1_s / 1_m;
+    const double kPDriveVel = 2.73;
     const double kI = 0.0;
     constexpr auto kMaxSpeed = 1_mps;
     constexpr auto kMaxAcceleration = 0.5_mps_sq;

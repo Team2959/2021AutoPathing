@@ -44,8 +44,8 @@ private:
     AHRS m_navX{frc::SPI::kMXP};
     frc::DifferentialDriveOdometry m_odometry{m_navX.GetRotation2d()};
 
-    const units::meter_t kTrackwidth = 0.69_m;
-    const double kGearboxRatio = 1.0 / 8.7; // One turn of the wheel is 8.7 turns of the motor
+    const units::meter_t kTrackwidth = 1.1733265312260803_m;
+    const double kGearboxRatio = 1.0 / 8.67; // One turn of the wheel is 8.67 turns of the motor
     const double kConversionFactor = kGearboxRatio * 6 * M_PI * 0.0254; // pi * wheel diameter * inches to meters
 
     void SetupSparkMax(rev::CANSparkMax* controller);
