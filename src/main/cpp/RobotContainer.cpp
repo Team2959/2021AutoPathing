@@ -6,7 +6,6 @@
 /*----------------------------------------------------------------------------*/
 
 #include "RobotContainer.h"
-#include "commands/IntakeSpeedCommand.h"
 
 #include <frc/controller/RamseteController.h>
 #include <frc/controller/PIDController.h>
@@ -19,12 +18,17 @@
 #include <wpi/SmallString.h>
 #include <frc/trajectory/Trajectory.h>
 #include <frc/trajectory/TrajectoryGenerator.h>
-#include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
 #include <frc2/command/InstantCommand.h>
-#include <frc2/command/RamseteCommand.h>
 #include <frc2/command/SequentialCommandGroup.h>
-#include <frc2/command/button/JoystickButton.h>
 #include <fstream>
+#include "commands/ReverseConveyorCommand.h"
+#include "commands/ReverseIntakeCommand.h"
+#include "commands/ReverseKickerCommand.h"
+#include "commands/IntakeToggleCommand.h"
+#include "commands/NewPowercellCommand.h"
+#include "commands/SecuredPowercellCommand.h"
+#include "commands/KickerPowercellCommand.h"
+#include "commands/IntakeFeedCommand.h"
 
 bool FileExists(std::string filename)
 {
@@ -34,6 +38,10 @@ bool FileExists(std::string filename)
 }
 
 RobotContainer::RobotContainer()
+  : m_newPowercellTrigger([this](){ return m_intake.GetSensorPressed(Intake::SensorLocation::NewPowercell); }),
+    m_securedPowercellTrigger([this](){ return m_intake.GetSensorPressed(Intake::SensorLocation::SecuredPowercell); }),
+    m_kickerTrigger([this](){ return m_intake.GetSensor(Intake::SensorLocation::Kicker); }),
+    m_intakeOnTrigger([this](){ return m_intake.IsIntakeRunning(); })
 {
   // Initialize all of your commands and subsystems here
   m_drivetrain.SetDefaultCommand(m_defaultDriveCommand);
@@ -50,7 +58,14 @@ void RobotContainer::RobotInit()
 void RobotContainer::ConfigureButtonBindings()
 {
   // Configure your button bindings here
-  m_oi.m_intakeSpeedButton.WhenHeld(IntakeSpeedCommand(m_intake, 0.75));
+  m_oi.m_reverseConveyorButton.WhenHeld(ReverseConveyorCommand(m_intake));
+  m_oi.m_reverseIntakeButton.WhenHeld(ReverseIntakeCommand(m_intake));
+  m_oi.m_reverseKickerButton.WhenHeld(ReverseKickerCommand(m_intake));
+  m_oi.m_intakeToggleButton.WhenHeld(IntakeToggleCommand(m_intake));
+  m_newPowercellTrigger.WhenActive(NewPowercellCommand(m_intake));
+  m_securedPowercellTrigger.WhenActive(SecuredPowercellCommand(m_intake));
+  m_kickerTrigger.WhenInactive(KickerPowercellCommand(m_intake));
+  m_intakeOnTrigger.WhileActiveOnce(IntakeFeedCommand(m_intake));
 }
 
 frc2::Command* RobotContainer::GetAutonomousCommand() {

@@ -38,6 +38,10 @@ class RobotContainer
   Intake m_intake;
   OI m_oi;
   
+  frc2::Trigger m_newPowercellTrigger;
+  frc2::Trigger m_securedPowercellTrigger;
+  frc2::Trigger m_kickerTrigger;
+  frc2::Trigger m_intakeOnTrigger;
 
   TeleopDriveCommand m_defaultDriveCommand {m_drivetrain, m_oi.m_driverJoystick};
 

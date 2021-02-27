@@ -37,6 +37,7 @@ void Intake::LoadingInit()
     SetConveyorSpeed(0);
     SetKickerSpeed(kFullKickerSpeed);
     SetIntakeSpeed(kFullIntakeSpeed);
+    ResetPowercellCount();
 }
 
 void Intake::OnRobotPeriodic()
@@ -124,7 +125,7 @@ bool Intake::GetSensorReleased(Intake::SensorLocation location)
 
 bool Intake::IsIntakeRunning() const
 {
-    return m_intake.Get() != 0.0;
+    return m_intake.Get() > 0.0;
 }
 
 double Intake::GetIntakeFullSpeed() const
@@ -199,11 +200,27 @@ void Intake::SetFeedingState(Intake::FeedingState state) {
     m_feedingState = state;
 }
 
+void Intake::IncrementPowercellCount()
+{
+    m_powercellCount++;
+}
+
+void Intake::ResetPowercellCount()
+{
+    m_powercellCount = 0;
+}
+
+int Intake::GetPowercellCount() const
+{
+    return m_powercellCount;
+}
+
 void Intake::Feed()
 {
     m_feedingSteps++;
     
-    switch (m_feedingState) {
+    switch (m_feedingState) 
+    {
     case FeedingState::Open:
         LeftBallFlipper(FeedingCylinderDirection::Opened);
         RightBallFlipper(FeedingCylinderDirection::Opened);
@@ -239,44 +256,4 @@ void Intake::Feed()
         }
         break;
     }
-
-    /*if(GetLeftBallFlipperSensor() && m_feedingState != FeedingState::Right)
-    {
-        m_feedingState = FeedingState::Left;
-        m_feedingSteps = 0;
-        LeftBallFlipper(false);
-    }
-    else if(GetRightBallFlipperSensor() && m_feedingState != FeedingState::Left)
-    {
-        m_feedingState = FeedingState::Right;
-        m_feedingSteps = 0;
-        RightBallFlipper(false);
-    }
-    /*if(!GetLeftBallFlipperSensor())
-    {
-        m_feedingState = FeedingState::Neither;
-        LeftBallFlipper(true);
-    }
-    if(!GetRightBallFlipperSensor())
-    {
-        m_feedingState = FeedingState::Neither;
-        RightBallFlipper(true);
-    }
-    if(m_feedingState != FeedingState::Neither)
-    {
-        m_feedingSteps++;
-    }
-    if(m_feedingSteps == 50)
-    {
-        m_feedingSteps = 0;
-        if(m_feedingState == FeedingState::Left)
-        {
-            LeftBallFlipper(true);
-        }
-        else if(m_feedingState == FeedingState::Right)
-        {
-            RightBallFlipper(true);
-        }
-        m_feedingState = FeedingState::Neither;
-    }*/
 }

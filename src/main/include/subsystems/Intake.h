@@ -74,6 +74,9 @@ private:
 
     std::string GetIntakeStateText();
 
+    int m_powercellCount = 0;
+
+   
 public:
     enum class SensorLocation
     {
@@ -81,6 +84,10 @@ public:
         NewPowercell,
         SecuredPowercell
     };
+
+    void IncrementPowercellCount();
+    void ResetPowercellCount();
+    int GetPowercellCount() const;
 
     void OnRobotInit();
     void OnRobotPeriodic();
@@ -116,6 +123,8 @@ public:
 
     FeedingState m_feedingState = FeedingState::Open;
     long unsigned int m_feedingSteps = 0;
+
+
     void Feed();
     void SetFeedingState(FeedingState state);
 

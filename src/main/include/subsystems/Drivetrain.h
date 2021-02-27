@@ -48,12 +48,15 @@ private:
     const double kGearboxRatio = 1.0 / 8.67; // One turn of the wheel is 8.67 turns of the motor
     const double kConversionFactor = kGearboxRatio * 6 * M_PI * 0.0254; // pi * wheel diameter * inches to meters
 
-    void SetupSparkMax(rev::CANSparkMax* controller);
-
     std::fstream m_logFile{};
 
     const int kLogInterval = 10;
     int m_steps = 0;
+
+    void SetupSparkMax(rev::CANSparkMax* controller);
+    double GetPosition();
+    double GetAngle();
+    frc::Rotation2d GetRotation();
 
 public:
     Drivetrain();
@@ -65,11 +68,8 @@ public:
     */
     void Periodic() override;
 
-    double GetAngle();
-    double GetPosition();
     void SetVolts(units::volt_t left, units::volt_t right); 
     void ResetOdometry(frc::Pose2d pose);
-    frc::Rotation2d GetRotation();
     frc::Pose2d GetPose();
     frc::DifferentialDriveWheelSpeeds GetWheelSpeeds();
     const frc::DifferentialDriveKinematics kDriveKinematics{kTrackwidth};

@@ -4,12 +4,7 @@
 
 #include "commands/IntakeToggleCommand.h"
 
-// NOTE:  Consider using this command inline, rather than writing a subclass.
-// For more information, see:
-// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-IntakeToggleCommand::IntakeToggleCommand(Intake& intake) : m_intake(intake) {
-  // Use addRequirements() here to declare subsystem dependencies.
-}
+IntakeToggleCommand::IntakeToggleCommand(Intake& intake) : m_intake(intake) {}
 
 // Called when the command is initially scheduled.
 void IntakeToggleCommand::Initialize() 

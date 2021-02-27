@@ -65,13 +65,13 @@ void Drivetrain::Periodic()
     auto left = units::meter_t(m_leftEncoder.GetPosition());
     auto right = units::meter_t(-m_rightEncoder.GetPosition());
 
-    auto leftV = units::meters_per_second_t(m_leftEncoder.GetVelocity());
-    auto rightV = units::meters_per_second_t(-m_rightEncoder.GetVelocity());
-
     auto pos = m_odometry.Update(rot, left, right);
 
     if((m_steps % kLogInterval) == 0)
     {
+        auto leftV = units::meters_per_second_t(m_leftEncoder.GetVelocity());
+        auto rightV = units::meters_per_second_t(-m_rightEncoder.GetVelocity());
+
         m_logFile 
             << std::to_string(m_navX.GetAngle()) << ","
             << std::to_string(double(left)) << ","
