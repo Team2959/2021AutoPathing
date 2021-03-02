@@ -32,6 +32,8 @@ class RobotContainer
   frc2::Command* GetPathingCommand(wpi::SmallString<64> name);
 
   void RobotInit();
+
+  const std::string kIntakeOnName = "Auto/Intake On";
  private:
   // The robot's subsystems and commands are defined here...
   Drivetrain m_drivetrain;

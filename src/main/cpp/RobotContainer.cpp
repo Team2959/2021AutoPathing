@@ -29,6 +29,8 @@
 #include "commands/SecuredPowercellCommand.h"
 #include "commands/KickerPowercellCommand.h"
 #include "commands/IntakeFeedCommand.h"
+#include "commands/IntakeRunCommand.h"
+#include <frc/smartdashboard/SmartDashboard.h>
 
 bool FileExists(std::string filename)
 {
@@ -53,6 +55,7 @@ RobotContainer::RobotContainer()
 void RobotContainer::RobotInit()
 {
   m_intake.OnRobotInit();
+  frc::SmartDashboard::PutBoolean(kIntakeOnName, false);
 }
 
 void RobotContainer::ConfigureButtonBindings()
@@ -144,8 +147,12 @@ frc2::Command* RobotContainer::GetPathingCommand(wpi::SmallString<64> name)
 
   m_drivetrain.ResetOdometry(trajectory.InitialPose());
 
+  bool turnOn = frc::SmartDashboard::GetBoolean(kIntakeOnName, false);
+
   return new frc2::SequentialCommandGroup(
+    IntakeRunCommand(m_intake, turnOn),
     std::move(ramseteCommand),
-    frc2::InstantCommand([this] { m_drivetrain.SetVolts(0_V, 0_V); })
+    frc2::InstantCommand([this] { m_drivetrain.SetVolts(0_V, 0_V); }),
+    IntakeRunCommand(m_intake, false)
   );
 }

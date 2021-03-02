@@ -7,7 +7,7 @@
 IntakeToggleCommand::IntakeToggleCommand(Intake& intake) : m_intake(intake) {}
 
 // Called when the command is initially scheduled.
-void IntakeToggleCommand::Initialize() 
+void IntakeToggleCommand::Initialize()
 {
   if (m_intake.IsIntakeRunning())
   {
