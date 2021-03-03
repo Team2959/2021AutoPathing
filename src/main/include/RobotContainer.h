@@ -13,7 +13,10 @@
 #include "OI.h"
 #include "commands/TeleopDriveCommand.h"
 
+#include <frc/smartdashboard/SendableChooser.h>
+
 #include <wpi/SmallString.h>
+#include <frc2/command/RamseteCommand.h>
 
 /**
  * This class is where the bulk of the robot should be declared.  Since
@@ -30,6 +33,7 @@ class RobotContainer
   frc2::Command* GetAutonomousCommand();
 
   frc2::Command* GetPathingCommand(wpi::SmallString<64> name);
+  frc2::Command* BouncePathAuto();
 
   void RobotInit();
 
@@ -39,7 +43,7 @@ class RobotContainer
   Drivetrain m_drivetrain;
   Intake m_intake;
   OI m_oi;
-  
+
   frc2::Trigger m_newPowercellTrigger;
   frc2::Trigger m_securedPowercellTrigger;
   frc2::Trigger m_kickerTrigger;
@@ -48,6 +52,8 @@ class RobotContainer
   TeleopDriveCommand m_defaultDriveCommand {m_drivetrain, m_oi.m_driverJoystick};
 
   void ConfigureButtonBindings();
+
+  frc2::RamseteCommand RamseteCommandFromPathWeaverJson(wpi::SmallString<64> name, bool resetOdometry = false);
 };
 
 

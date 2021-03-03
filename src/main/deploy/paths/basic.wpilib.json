@@ -1,1 +1,32 @@
-[{"time":0.0,"velocity":0.0,"acceleration":1.0,"pose":{"translation":{"x":1.6275093359115353,"y":2.2424874010514233},"rotation":{"radians":0.0}},"curvature":0.0},{"time":9.026229932340375,"velocity":0.0,"acceleration":-1.0,"pose":{"translation":{"x":5.874338993292643,"y":2.196073962172942},"rotation":{"radians":0.0}},"curvature":-8.443892082002688E-14}]
+[
+    {
+        "time" : 0.0,
+        "velocity" : 0.0,
+        "acceleration" : 1.0,
+        "pose" : {
+            "translation" : {
+                "x" : 1.6275093359115353,
+                "y" : 2.2424874010514233
+            },
+            "rotation" : {
+                "radians" : 0.0
+            }
+        },
+        "curvature" : 0.0
+    },
+    {
+        "time" : 9.026229932340375,
+        "velocity" : 0.0,
+        "acceleration":-1.0,
+        "pose" : {
+            "translation" : {
+                "x" : 5.874338993292643,
+                "y" : 2.196073962172942
+            },
+            "rotation" : {
+                "radians" : 0.0
+            }
+        },
+        "curvature" : -8.443892082002688E-14
+    }
+]

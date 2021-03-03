@@ -13,7 +13,6 @@
 #include <frc/controller/SimpleMotorFeedforward.h>
 #include <frc/Filesystem.h>
 #include <frc/trajectory/TrajectoryUtil.h>
-#include <frc2/command/RamseteCommand.h>
 #include <wpi/Path.h>
 #include <wpi/SmallString.h>
 #include <frc/trajectory/Trajectory.h>
@@ -121,6 +120,64 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
 
 frc2::Command* RobotContainer::GetPathingCommand(wpi::SmallString<64> name)
 {
+  auto ramseteCommand = RamseteCommandFromPathWeaverJson(name, true);
+  // wpi::SmallString<128> deployDirectory;
+  // frc::filesystem::GetDeployDirectory(deployDirectory);
+  // wpi::sys::path::append(deployDirectory, "paths");
+  // wpi::sys::path::append(deployDirectory, name);
+  // std::cout << deployDirectory << std::endl;
+  // // if(!FileExists(std::string(deployDirectory.c_str())))
+  // // {
+  // //   return nullptr;
+  // // }
+  // frc::Trajectory trajectory = frc::TrajectoryUtil::FromPathweaverJson(deployDirectory);  
+
+  // frc2::RamseteCommand ramseteCommand = frc2::RamseteCommand(
+  //     trajectory, [this]() { return m_drivetrain.GetPose(); },
+  //     frc::RamseteController(Drive::kRamseteB,
+  //                            Drive::kRamseteZeta),
+  //     frc::SimpleMotorFeedforward<units::meters>(
+  //         Drive::ks, Drive::kv, Drive::ka),
+  //     m_drivetrain.kDriveKinematics,
+  //     [this] { return m_drivetrain.GetWheelSpeeds(); },
+  //     frc2::PIDController(Drive::kPDriveVel, Drive::kI, 0),
+  //     frc2::PIDController(Drive::kPDriveVel, Drive::kI, 0),
+  //     [this](auto left, auto right) { m_drivetrain.SetVolts(left, right); },
+  //     {&m_drivetrain});
+
+  // m_drivetrain.ResetOdometry(trajectory.InitialPose());
+
+  bool turnOn = frc::SmartDashboard::GetBoolean(kIntakeOnName, false);
+
+  return new frc2::SequentialCommandGroup(
+    IntakeRunCommand(m_intake, turnOn),
+    std::move(ramseteCommand),
+    frc2::InstantCommand([this] { m_drivetrain.SetVolts(0_V, 0_V); }),
+    IntakeRunCommand(m_intake, false)
+  );
+}
+
+frc2::Command* RobotContainer::BouncePathAuto()
+{
+  wpi::SmallString<64> name {"Bounce1.wpilib.json"};
+  auto bounce1 = RamseteCommandFromPathWeaverJson(name, true);
+  name = "Bounce2.wpilib.json";
+  auto bounce2 = RamseteCommandFromPathWeaverJson(name);
+  name = "Bounce3.wpilib.json";
+  auto bounce3 = RamseteCommandFromPathWeaverJson(name);
+  name = "Bounce4.wpilib.json";
+  auto bounce4 = RamseteCommandFromPathWeaverJson(name);
+
+  return new frc2::SequentialCommandGroup(
+    std::move(bounce1),
+    std::move(bounce2),
+    std::move(bounce3),
+    std::move(bounce4),
+    frc2::InstantCommand([this] { m_drivetrain.SetVolts(0_V, 0_V); }));
+}
+
+frc2::RamseteCommand RobotContainer::RamseteCommandFromPathWeaverJson(wpi::SmallString<64> name, bool resetOdometry)
+{
   wpi::SmallString<128> deployDirectory;
   frc::filesystem::GetDeployDirectory(deployDirectory);
   wpi::sys::path::append(deployDirectory, "paths");
@@ -132,7 +189,12 @@ frc2::Command* RobotContainer::GetPathingCommand(wpi::SmallString<64> name)
   // }
   frc::Trajectory trajectory = frc::TrajectoryUtil::FromPathweaverJson(deployDirectory);  
 
-  frc2::RamseteCommand ramseteCommand = frc2::RamseteCommand(
+  if (resetOdometry)
+  {
+    m_drivetrain.ResetOdometry(trajectory.InitialPose());
+  }
+
+  return frc2::RamseteCommand(
       trajectory, [this]() { return m_drivetrain.GetPose(); },
       frc::RamseteController(Drive::kRamseteB,
                              Drive::kRamseteZeta),
@@ -144,15 +206,4 @@ frc2::Command* RobotContainer::GetPathingCommand(wpi::SmallString<64> name)
       frc2::PIDController(Drive::kPDriveVel, Drive::kI, 0),
       [this](auto left, auto right) { m_drivetrain.SetVolts(left, right); },
       {&m_drivetrain});
-
-  m_drivetrain.ResetOdometry(trajectory.InitialPose());
-
-  bool turnOn = frc::SmartDashboard::GetBoolean(kIntakeOnName, false);
-
-  return new frc2::SequentialCommandGroup(
-    IntakeRunCommand(m_intake, turnOn),
-    std::move(ramseteCommand),
-    frc2::InstantCommand([this] { m_drivetrain.SetVolts(0_V, 0_V); }),
-    IntakeRunCommand(m_intake, false)
-  );
 }

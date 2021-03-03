@@ -11,8 +11,10 @@
 #include <frc2/command/CommandScheduler.h>
 
 void Robot::RobotInit() {
-  frc::SmartDashboard::PutString("Path", "");
   m_container.RobotInit();
+  m_autoChooser.SetName("Special Auto Modes");
+  m_autoChooser.AddOption("Bounce", "Bounce");
+  frc::SmartDashboard::PutData(&m_autoChooser);
 }
 
 /**
@@ -41,12 +43,27 @@ void Robot::DisabledPeriodic() {}
  * RobotContainer} class.
  */
 void Robot::AutonomousInit() {
-  std::string file = frc::SmartDashboard::GetString("Path", "none");
-  wpi::Twine twine{file};
-  wpi::SmallString<64> smallString;
-  twine.toVector(smallString);
-  std::cout << smallString << std::endl;
-  m_autonomousCommand = m_container.GetPathingCommand(smallString);
+  std::string file = frc::SmartDashboard::GetString("Path", "");
+  if(file.length() == 0)
+  {
+      file = m_autoChooser.GetSelected();
+      if(file.length() == 0)
+      {
+          return;
+      }
+      if(file == "Bounce")
+      {
+          m_autonomousCommand = m_container.BouncePathAuto();
+      }
+  }
+  else
+  {
+      wpi::Twine twine{file};
+      wpi::SmallString<64> smallString;
+      twine.toVector(smallString);
+      std::cout << smallString << std::endl;
+      m_autonomousCommand = m_container.GetPathingCommand(smallString);
+  }
   if(m_autonomousCommand == nullptr)
   {
     m_autonomousCommand = m_container.GetAutonomousCommand();
