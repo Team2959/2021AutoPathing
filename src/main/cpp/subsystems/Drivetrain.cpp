@@ -1,8 +1,11 @@
 #include "subsystems/Drivetrain.h"
 #include <Robot.h>
 
+#include "utility/Filesystem.h"
+
 #include <ctime>
 #include <unistd.h>
+#include <hal/cpp/fpga_clock.h>
 
 
 Drivetrain::Drivetrain()
@@ -21,16 +24,7 @@ Drivetrain::Drivetrain()
     m_leftEncoder.SetVelocityConversionFactor(kConversionFactor / 60.0);
     m_rightEncoder.SetVelocityConversionFactor(kConversionFactor / 60.0);
 
-    std::string filename = "/home/lvuser/odometry.csv";
-    char buf[100];
-    std::cout << std::string(getcwd(buf, 100)) << filename << std::endl;
-    m_logFile.open(filename);
-    if(!m_logFile.good() || !m_logFile.is_open())
-    {
-        std::cout << "Log File failed to open" << std::endl;
-    }
-    m_logFile << "angle,left,right,rotation,positionX,positionY,leftVelocity,rightVelocity\n" << std::flush;
-
+    
     SetupSparkMax(&m_leftPrimary);
     SetupSparkMax(&m_rightPrimary);
     SetupSparkMax(&m_leftFollower1);
@@ -64,27 +58,33 @@ void Drivetrain::Periodic()
     auto rot = GetRotation();
     auto left = units::meter_t(m_leftEncoder.GetPosition());
     auto right = units::meter_t(-m_rightEncoder.GetPosition());
+    m_lastPosition = m_odometry.Update(rot, left, right);
+}
 
-    auto pos = m_odometry.Update(rot, left, right);
+std::string Drivetrain::GetLoggingData()
+{
+    auto rot = GetRotation();
+    auto left = units::meter_t(m_leftEncoder.GetPosition());
+    auto right = units::meter_t(-m_rightEncoder.GetPosition());
 
-    if((m_steps % kLogInterval) == 0)
-    {
-        auto leftV = units::meters_per_second_t(m_leftEncoder.GetVelocity());
-        auto rightV = units::meters_per_second_t(-m_rightEncoder.GetVelocity());
-
-        m_logFile 
-            << std::to_string(m_navX.GetAngle()) << ","
-            << std::to_string(double(left)) << ","
-            << std::to_string(double(right)) << ","
-            << std::to_string(double(rot.Degrees())) << ","
-            << std::to_string(double(pos.X())) << ","
-            << std::to_string(double(pos.Y())) << ","
-            << std::to_string(double(leftV)) << ","
-            << std::to_string(double(rightV)) << ","
-            << "\n";
-        m_logFile.flush();
-    }
-    m_steps++;
+    auto pos = m_lastPosition;
+    
+    auto leftV = units::meters_per_second_t(m_leftEncoder.GetVelocity());
+    auto rightV = units::meters_per_second_t(-m_rightEncoder.GetVelocity());
+    
+    std::string data = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(hal::fpga_clock::now().time_since_epoch()).count()) + ","
+        + std::to_string(m_navX.GetAngle()) + ","
+        + std::to_string(double(left)) + ","
+        + std::to_string(double(right)) + ","
+        + std::to_string(double(rot.Degrees())) + ","
+        + std::to_string(double(pos.X())) + ","
+        + std::to_string(double(pos.Y())) + ","
+        + std::to_string(double(leftV)) + ","
+        + std::to_string(double(rightV)) + ","
+        + std::to_string(m_lastLeftSetpoint.to<double>()) + ","
+        + std::to_string(m_lastRightSetpoint.to<double>()) + ","
+        + "\n";
+    return data;
 }
 
 double Drivetrain::GetAngle() // units::degree_t
@@ -115,4 +115,17 @@ void Drivetrain::ResetOdometry(frc::Pose2d pose)
     m_leftEncoder.SetPosition(0);
     m_rightEncoder.SetPosition(0);
     m_odometry.ResetPosition(pose, GetRotation());
+}
+
+void Drivetrain::CalculateOutput(units::meters_per_second_t left, units::meters_per_second_t right)
+{
+    m_lastLeftSetpoint = left;
+    m_lastRightSetpoint = right;
+    auto wheelSpeeds = GetWheelSpeeds();
+    auto leftVolts = m_feedForward.Calculate(left);
+    auto rightVolts = m_feedForward.Calculate(right);
+    auto leftPIDMeasurement = m_leftPIDController.Calculate(wheelSpeeds.left.to<double>(), left.to<double>());
+    auto rightPIDMeasurement = m_rightPIDController.Calculate(wheelSpeeds.right.to<double>(), right.to<double>());
+    SetVolts(leftVolts + static_cast<units::volt_t>(leftPIDMeasurement),
+            rightVolts + static_cast<units::volt_t>(rightPIDMeasurement));
 }

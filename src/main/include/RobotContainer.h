@@ -37,6 +37,8 @@ class RobotContainer
 
   void RobotInit();
 
+  std::string GetLoggingData();
+
   const std::string kIntakeOnName = "Auto/Intake On";
  private:
   // The robot's subsystems and commands are defined here...

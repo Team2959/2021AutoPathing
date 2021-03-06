@@ -1,9 +1,9 @@
 {
   "lengthUnit": "Meter",
   "exportUnit": "Always Meters",
-  "maxVelocity": 1.0,
-  "maxAcceleration": 2.0,
-  "wheelBase": 0.69,
-  "gameName": "Bounce Path",
+  "maxVelocity": 1.5,
+  "maxAcceleration": 1.0,
+  "wheelBase": 0.5461,
+  "gameName": "2021 Telemetry Test",
   "outputDir": ""
 }

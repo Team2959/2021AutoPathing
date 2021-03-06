@@ -100,13 +100,8 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
       exampleTrajectory, [this]() { return m_drivetrain.GetPose(); },
       frc::RamseteController(Drive::kRamseteB,
                              Drive::kRamseteZeta),
-      frc::SimpleMotorFeedforward<units::meters>(
-          Drive::ks, Drive::kv, Drive::ka),
       m_drivetrain.kDriveKinematics,
-      [this] { return m_drivetrain.GetWheelSpeeds(); },
-      frc2::PIDController(Drive::kPDriveVel, 0, 0),
-      frc2::PIDController(Drive::kPDriveVel, 0, 0),
-      [this](auto left, auto right) { m_drivetrain.SetVolts(left, right); },
+      [this](auto left, auto right) { m_drivetrain.CalculateOutput(left, right); },
       {&m_drivetrain});
 
   // Reset odometry to the starting pose of the trajectory.
@@ -121,32 +116,6 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
 frc2::Command* RobotContainer::GetPathingCommand(wpi::SmallString<64> name)
 {
   auto ramseteCommand = RamseteCommandFromPathWeaverJson(name, true);
-  // wpi::SmallString<128> deployDirectory;
-  // frc::filesystem::GetDeployDirectory(deployDirectory);
-  // wpi::sys::path::append(deployDirectory, "paths");
-  // wpi::sys::path::append(deployDirectory, name);
-  // std::cout << deployDirectory << std::endl;
-  // // if(!FileExists(std::string(deployDirectory.c_str())))
-  // // {
-  // //   return nullptr;
-  // // }
-  // frc::Trajectory trajectory = frc::TrajectoryUtil::FromPathweaverJson(deployDirectory);  
-
-  // frc2::RamseteCommand ramseteCommand = frc2::RamseteCommand(
-  //     trajectory, [this]() { return m_drivetrain.GetPose(); },
-  //     frc::RamseteController(Drive::kRamseteB,
-  //                            Drive::kRamseteZeta),
-  //     frc::SimpleMotorFeedforward<units::meters>(
-  //         Drive::ks, Drive::kv, Drive::ka),
-  //     m_drivetrain.kDriveKinematics,
-  //     [this] { return m_drivetrain.GetWheelSpeeds(); },
-  //     frc2::PIDController(Drive::kPDriveVel, Drive::kI, 0),
-  //     frc2::PIDController(Drive::kPDriveVel, Drive::kI, 0),
-  //     [this](auto left, auto right) { m_drivetrain.SetVolts(left, right); },
-  //     {&m_drivetrain});
-
-  // m_drivetrain.ResetOdometry(trajectory.InitialPose());
-
   bool turnOn = frc::SmartDashboard::GetBoolean(kIntakeOnName, false);
 
   return new frc2::SequentialCommandGroup(
@@ -194,16 +163,17 @@ frc2::RamseteCommand RobotContainer::RamseteCommandFromPathWeaverJson(wpi::Small
     m_drivetrain.ResetOdometry(trajectory.InitialPose());
   }
 
-  return frc2::RamseteCommand(
+  frc2::RamseteCommand ramseteCommand(
       trajectory, [this]() { return m_drivetrain.GetPose(); },
       frc::RamseteController(Drive::kRamseteB,
                              Drive::kRamseteZeta),
-      frc::SimpleMotorFeedforward<units::meters>(
-          Drive::ks, Drive::kv, Drive::ka),
       m_drivetrain.kDriveKinematics,
-      [this] { return m_drivetrain.GetWheelSpeeds(); },
-      frc2::PIDController(Drive::kPDriveVel, Drive::kI, 0),
-      frc2::PIDController(Drive::kPDriveVel, Drive::kI, 0),
-      [this](auto left, auto right) { m_drivetrain.SetVolts(left, right); },
+      [this](auto left, auto right) { m_drivetrain.CalculateOutput(left, right); },
       {&m_drivetrain});
+  return ramseteCommand;
+}
+
+std::string RobotContainer::GetLoggingData()
+{
+    return m_drivetrain.GetLoggingData();
 }

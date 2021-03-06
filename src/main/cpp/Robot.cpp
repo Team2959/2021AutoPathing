@@ -10,11 +10,41 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc2/command/CommandScheduler.h>
 
+// #include <experimental/filesystem>
+#include <dirent.h>
+#include <thread>
+
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+// namespace fs = std::experimental::filesystem;
+
 void Robot::RobotInit() {
   m_container.RobotInit();
   m_autoChooser.SetName("Special Auto Modes");
   m_autoChooser.AddOption("Bounce", "Bounce");
-  frc::SmartDashboard::PutData(&m_autoChooser);
+
+  std::string paths_dir = "/home/lvuser/deploy/paths";
+
+  DIR *dir;
+  struct dirent *ent;
+  if ((dir = opendir(paths_dir.c_str())) != NULL) {
+    while ((ent = readdir(dir)) != NULL) {
+      if(ent->d_type == DT_REG)
+        m_autoChooser.AddOption(ent->d_name, ent->d_name);
+    }
+    closedir(dir);
+  }
+
+  m_autoChooser.SetName("Auto Mode");
+  // for (auto& entry : fs::directory_iterator(paths_dir)) {
+  //     m_autoChooser.AddOption(entry.path().filename().string(), entry.path().filename().string());
+  // }
+  frc::SmartDashboard::PutData(&m_autoChooser); 
+  //StartNewLogFile();
 }
 
 /**
@@ -34,7 +64,11 @@ void Robot::RobotPeriodic() {
  * can use it to reset any subsystem information you want to clear when the
  * robot is disabled.
  */
-void Robot::DisabledInit() {}
+void Robot::DisabledInit() 
+{
+    if(m_logFile.is_open())
+      m_logFile.close();
+}
 
 void Robot::DisabledPeriodic() {}
 
@@ -43,18 +77,11 @@ void Robot::DisabledPeriodic() {}
  * RobotContainer} class.
  */
 void Robot::AutonomousInit() {
-  std::string file = frc::SmartDashboard::GetString("Path", "");
-  if(file.length() == 0)
+  StartNewLogFile();
+  std::string file = m_autoChooser.GetSelected();
+  if(file == "Bounce")
   {
-      file = m_autoChooser.GetSelected();
-      if(file.length() == 0)
-      {
-          return;
-      }
-      if(file == "Bounce")
-      {
-          m_autonomousCommand = m_container.BouncePathAuto();
-      }
+      m_autonomousCommand = m_container.BouncePathAuto();
   }
   else
   {
@@ -74,7 +101,9 @@ void Robot::AutonomousInit() {
   }
 }
 
-void Robot::AutonomousPeriodic() {}
+void Robot::AutonomousPeriodic() {
+  Log();
+}
 
 void Robot::TeleopInit() {
   // This makes sure that the autonomous stops running when
@@ -85,17 +114,56 @@ void Robot::TeleopInit() {
     m_autonomousCommand->Cancel();
     m_autonomousCommand = nullptr;
   }
+  StartNewLogFile();
 }
 
 /**
  * This function is called periodically during operator control.
  */
-void Robot::TeleopPeriodic() {}
+void Robot::TeleopPeriodic() 
+{
+    Log();
+}
 
 /**
  * This function is called periodically during test mode.
  */
 void Robot::TestPeriodic() {}
+
+void Robot::StartNewLogFile()
+{
+    if(m_logFile.is_open()) 
+        m_logFile.close();
+    std::string usbDirectory = GetFirstDirectory("/media");
+    std::string filename;
+    if(usbDirectory.length() == 0)
+    {
+        std::string odometryDirectory = "/home/lvuser/odometry";
+        filename = GetFirstModifiedFile(odometryDirectory);
+        filename = odometryDirectory + "/" + filename;
+    }
+    else
+    {
+        usbDirectory = "/media/" + usbDirectory;
+        int i;
+        std::string odometryPrefix = "odometry";
+        for(i = 0; std::ifstream{usbDirectory + "/" + odometryPrefix + std::to_string(i) + ".csv"}.good(); i++);
+        filename = usbDirectory + "/" + odometryPrefix + std::to_string(i) + ".csv";
+    }
+    std::cout << "Log File:" << filename << std::endl;
+    m_logFile.open(filename);
+    if(!m_logFile.good() || !m_logFile.is_open())
+    {
+        std::cout << "Log File failed to open" << std::endl;
+    }
+    m_logFile << "timestamp,angle,left,right,rotation,positionX,positionY,leftVelocity,rightVelocity,leftSetpoint,rightSetpoint\n" << std::flush;
+}
+
+void Robot::Log()
+{
+    std::string data = m_container.GetLoggingData();
+    m_logFile << data << std::flush;
+}
 
 #ifndef RUNNING_FRC_TESTS
 int main() { return frc::StartRobot<Robot>(); }

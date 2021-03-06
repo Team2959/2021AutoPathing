@@ -11,6 +11,7 @@
 #include <frc2/command/Command.h>
 
 #include "RobotContainer.h"
+#include "utility/Filesystem.h"
 
 class Robot : public frc::TimedRobot {
  public:
@@ -24,7 +25,11 @@ class Robot : public frc::TimedRobot {
   void TeleopPeriodic() override;
   void TestPeriodic() override;
 
+  std::ofstream m_logFile;
+
  private:
+  void StartNewLogFile();
+  void Log();
   // Have it null by default so that if testing teleop it
   // doesn't have undefined behavior and potentially crash.
   frc2::Command* m_autonomousCommand = nullptr;
