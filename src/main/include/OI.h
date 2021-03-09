@@ -11,6 +11,7 @@ public:
 
     frc::Joystick m_driverJoystick{0};
     frc::Joystick m_buttonBox{1};
+    frc::Joystick m_leftTankDriveJoystick{2};
 
     frc2::JoystickButton m_reverseKickerButton{&m_buttonBox, kReverseKicker};
     frc2::JoystickButton m_reverseConveyorButton{&m_buttonBox, kReverseConveyor};

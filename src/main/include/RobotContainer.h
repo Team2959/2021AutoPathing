@@ -51,7 +51,7 @@ class RobotContainer
   frc2::Trigger m_kickerTrigger;
   frc2::Trigger m_intakeOnTrigger;
 
-  TeleopDriveCommand m_defaultDriveCommand {m_drivetrain, m_oi.m_driverJoystick};
+  TeleopDriveCommand m_defaultDriveCommand {m_drivetrain, m_oi.m_driverJoystick, m_oi.m_leftTankDriveJoystick};
 
   void ConfigureButtonBindings();
 

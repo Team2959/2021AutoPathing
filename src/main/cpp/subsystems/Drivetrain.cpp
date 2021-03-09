@@ -53,6 +53,12 @@ void Drivetrain::CurvatureDrive(double speed, double rotation, bool quickTurn)
     m_differentialDrive.CurvatureDrive(speed, rotation, quickTurn);
 }
 
+void Drivetrain::TankDrive(double left, double right)
+{
+    m_differentialDrive.TankDrive(left, right, false);
+}
+
+
 void Drivetrain::Periodic()
 {
     auto rot = GetRotation();
@@ -129,3 +135,5 @@ void Drivetrain::CalculateOutput(units::meters_per_second_t left, units::meters_
     SetVolts(leftVolts + static_cast<units::volt_t>(leftPIDMeasurement),
             rightVolts + static_cast<units::volt_t>(rightPIDMeasurement));
 }
+
+

@@ -92,6 +92,14 @@ const int kReverseConveyor = 7;
 const int kReverseKicker = 6;
 const int kTurnToTarget = 4;
 
+
+const double kDefaultDeadband = 0.07;
+const double kDefaultOutputOffset = 0.0;
+const double kDefaultExponent = 3.0;
+const double kDefaultAutoTurnMultiplier = 0.05;
+const double kDefaultAutoTurnDegrees = 30.0;
+const double kDefaultAutoTurnOffset = 0.01;
+
 namespace Drive 
 {
     const double kRamseteB = 2;

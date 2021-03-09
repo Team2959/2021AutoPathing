@@ -68,12 +68,12 @@ private:
     units::meters_per_second_t m_lastRightSetpoint;
 
     frc::Pose2d m_lastPosition;
-
 public:
     Drivetrain();
 
 
     void CurvatureDrive(double speed, double rotation, bool quickTurn);
+    void TankDrive(double left, double right);
     
     /**
     * Will be called periodically whenever the CommandScheduler runs.

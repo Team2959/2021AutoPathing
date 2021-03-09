@@ -44,7 +44,17 @@ void Robot::RobotInit() {
   //     m_autoChooser.AddOption(entry.path().filename().string(), entry.path().filename().string());
   // }
   frc::SmartDashboard::PutData(&m_autoChooser); 
+
+  frc::SmartDashboard::PutBoolean("Curvature Drive", true);
   //StartNewLogFile();
+  frc::SmartDashboard::PutNumber("Drive/Deadband",.1);
+  frc::SmartDashboard::PutNumber("Drive/Exponent",2.5);
+  frc::SmartDashboard::PutNumber("Drive/Output Min",0.0);
+  frc::SmartDashboard::PutNumber("Drive/Turn Deadband",.1);
+  frc::SmartDashboard::PutNumber("Drive/Turn Exponent",4);
+  frc::SmartDashboard::PutNumber("Drive/Turn Output Min",0.0);
+  frc::SmartDashboard::PutNumber("Drive/Output Max", 1.0);
+  frc::SmartDashboard::PutNumber("Drive/Turn Output Max", 1.0);
 }
 
 /**
