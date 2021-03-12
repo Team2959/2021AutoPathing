@@ -9,3 +9,4 @@ bool IsExistingRegularFile(std::string filename);
 time_t GetLastModifiedTimestamp(std::string filename);
 std::string GetFirstModifiedFile(std::string directory);
 std::string GetFirstDirectory(std::string directory);
+std::string RandomString();

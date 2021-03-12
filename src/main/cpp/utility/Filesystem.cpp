@@ -1,5 +1,8 @@
 #include "utility/Filesystem.h"
 
+#include <random>
+#include <algorithm>
+
 bool IsExistingRegularFile(std::string filename)
 {
     struct stat info;
@@ -59,5 +62,14 @@ std::string GetFirstDirectory(std::string directory)
         closedir(dir);
     }
     return std::string{};
+}
+
+std::string RandomString()
+{
+    std::string str("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::shuffle(str.begin(), str.end(), generator);
+    return str.substr(0,6);
 }
 

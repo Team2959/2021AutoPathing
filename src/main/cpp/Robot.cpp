@@ -33,8 +33,11 @@ void Robot::RobotInit() {
   struct dirent *ent;
   if ((dir = opendir(paths_dir.c_str())) != NULL) {
     while ((ent = readdir(dir)) != NULL) {
-      if(ent->d_type == DT_REG)
-        m_autoChooser.AddOption(ent->d_name, ent->d_name);
+      if(ent->d_type == DT_REG) {
+        std::string name = ent->d_name;
+        name = name.substr(0, name.length() - std::string(".wpilib.json").length());
+        m_autoChooser.AddOption(name, ent->d_name);
+      }
     }
     closedir(dir);
   }
@@ -55,6 +58,7 @@ void Robot::RobotInit() {
   frc::SmartDashboard::PutNumber("Drive/Turn Output Min",0.0);
   frc::SmartDashboard::PutNumber("Drive/Output Max", 1.0);
   frc::SmartDashboard::PutNumber("Drive/Turn Output Max", 1.0);
+  frc::SmartDashboard::PutString("Odometry File", "");
 }
 
 /**
@@ -156,9 +160,10 @@ void Robot::StartNewLogFile()
     {
         usbDirectory = "/media/" + usbDirectory;
         int i;
-        std::string odometryPrefix = "odometry";
-        for(i = 0; std::ifstream{usbDirectory + "/" + odometryPrefix + std::to_string(i) + ".csv"}.good(); i++);
-        filename = usbDirectory + "/" + odometryPrefix + std::to_string(i) + ".csv";
+        std::string odometryPrefix = m_autoChooser.GetSelected();
+        std::string random_str = RandomString();
+        for(i = 0; std::ifstream{usbDirectory + "/" + odometryPrefix + random_str + std::to_string(i) + ".csv"}.good(); i++);
+        filename = usbDirectory + "/" + odometryPrefix + random_str + std::to_string(i) + ".csv";
     }
     std::cout << "Log File:" << filename << std::endl;
     m_logFile.open(filename);
@@ -167,6 +172,7 @@ void Robot::StartNewLogFile()
         std::cout << "Log File failed to open" << std::endl;
     }
     m_logFile << "timestamp,angle,left,right,rotation,positionX,positionY,leftVelocity,rightVelocity,leftSetpoint,rightSetpoint\n" << std::flush;
+    frc::SmartDashboard::PutString("Odometry File", filename);
 }
 
 void Robot::Log()
