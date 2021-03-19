@@ -48,7 +48,7 @@ private:
 
     const units::meter_t kTrackwidth =  0.5461_m; //1.1733265312260803_m; 
     const double kGearboxRatio = 1.0 / 8.67; // One turn of the wheel is 8.67 turns of the motor
-    const double kConversionFactor = kGearboxRatio * 5.9 * M_PI * 0.0254; // pi * wheel diameter * inches to meters
+    const double kConversionFactor = kGearboxRatio * 6.0 * M_PI * 0.0254; // pi * wheel diameter * inches to meters
 
     std::ofstream m_logFile{};
 

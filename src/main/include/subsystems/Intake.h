@@ -59,7 +59,7 @@ private:
 
     bool m_debugEnable = false;
 
-    const double kFullIntakeSpeed = 0.5;//0.75; when we had eccentric intake wheels on side
+    const double kFullIntakeSpeed = 0.75;
     const double kFullConveyorSpeed = 0.6;
     const double kFullKickerSpeed = 0.3;
     const double kFullConveyorSpeedWhenLoading = 1.0;

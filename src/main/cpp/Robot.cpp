@@ -59,6 +59,8 @@ void Robot::RobotInit() {
   frc::SmartDashboard::PutNumber("Drive/Output Max", 1.0);
   frc::SmartDashboard::PutNumber("Drive/Turn Output Max", 1.0);
   frc::SmartDashboard::PutString("Odometry File", "");
+  frc::SmartDashboard::PutNumber("ZETA", Drive::kRamseteZeta);
+  frc::SmartDashboard::PutNumber("Ramsette B", Drive::kRamseteB);
 }
 
 /**

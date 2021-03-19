@@ -95,11 +95,12 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
       frc::Pose2d(3_m, 0_m, frc::Rotation2d(0_deg)),
       // Pass the config
       config);
+  auto zeta = frc::SmartDashboard::GetNumber("ZETA", Drive::kRamseteZeta);
+  auto b = frc::SmartDashboard::GetNumber("Ramsette B", Drive::kRamseteB);
 
   frc2::RamseteCommand ramseteCommand(
       exampleTrajectory, [this]() { return m_drivetrain.GetPose(); },
-      frc::RamseteController(Drive::kRamseteB,
-                             Drive::kRamseteZeta),
+      frc::RamseteController(b,zeta),
       m_drivetrain.kDriveKinematics,
       [this](auto left, auto right) { m_drivetrain.CalculateOutput(left, right); },
       {&m_drivetrain});
@@ -163,10 +164,12 @@ frc2::RamseteCommand RobotContainer::RamseteCommandFromPathWeaverJson(wpi::Small
     m_drivetrain.ResetOdometry(trajectory.InitialPose());
   }
 
+  auto zeta = frc::SmartDashboard::GetNumber("ZETA", Drive::kRamseteZeta);
+  auto b = frc::SmartDashboard::GetNumber("Ramsette B", Drive::kRamseteB);
+
   frc2::RamseteCommand ramseteCommand(
       trajectory, [this]() { return m_drivetrain.GetPose(); },
-      frc::RamseteController(Drive::kRamseteB,
-                             Drive::kRamseteZeta),
+      frc::RamseteController(b, zeta),
       m_drivetrain.kDriveKinematics,
       [this](auto left, auto right) { m_drivetrain.CalculateOutput(left, right); },
       {&m_drivetrain});
