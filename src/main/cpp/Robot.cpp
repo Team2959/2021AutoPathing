@@ -69,6 +69,7 @@ void Robot::RobotInit() {
           // Read path way points into trajectory
           // https://github.com/wpilibsuite/PathWeaver/blob/bbba553201b24fff8e23509b0af7104f0bde3a35/src/main/java/edu/wpi/first/pathweaver/spline/wpilib/WpilibSpline.java
           // https://github.com/wpilibsuite/PathWeaver/blob/bbba553201b24fff8e23509b0af7104f0bde3a35/src/main/java/edu/wpi/first/pathweaver/Waypoint.java#L25
+          
           frc::Trajectory trajectory = frc::TrajectoryGenerator(, config);
           wpi::SmallString<128> json_path(deployDirectory);
           json_path.append(name.substr(0, name.length() - raw_path_ending.length()) + ".wpilib.json");
