@@ -9,6 +9,13 @@
 
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc2/command/CommandScheduler.h>
+#include <frc/trajectory/Trajectory.h>
+#include <frc/trajectory/TrajectoryUtil.h>
+#include <frc/trajectory/TrajectoryGenerator.h>
+#include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
+#include <wpi/Path.h>
+#include <wpi/SmallString.h>
+#include <frc/Filesystem.h>
 
 // #include <experimental/filesystem>
 #include <dirent.h>
@@ -28,9 +35,50 @@ void Robot::RobotInit() {
   m_autoChooser.AddOption("Bounce", "Bounce");
 
   std::string paths_dir = "/home/lvuser/deploy/paths";
+  std::string raw_path_dir = "/home/lvuser/deploy/raw_paths";
+  std::string raw_path_ending = ".path";
+
+  frc::TrajectoryConfig config(Drive::kMaxSpeed, Drive::kMaxAcceleration);
+  config.SetStartVelocity(0_ms);
+  config.SetEndVelocity(0_ms);
+  
+  frc::CentripetalAccelerationConstraint constraint(Drive::kMaxCentripetalAcceleration);
+
+  // Centripetal Acceleration (ac) = v^2/r
+  // example v = 1m/s, r = 30" = 0.762m
+  // a = 1 / 0.762 ~= 1.31 m/s^2
+  //
+  // find out the tightest turn we need to make and then figure out how fast we can make that without spinning out.
+  // with that as the limit, we should be able to make all larger radius turns without skidding as well.
+
+  config.AddConstraint(constraint);
+
+  wpi::SmallString<128> deployDirectory;
+  frc::filesystem::GetDeployDirectory(deployDirectory);
+  wpi::sys::path::append(deployDirectory, "paths");
 
   DIR *dir;
   struct dirent *ent;
+  if ((dir = opendir(raw_path_dir.c_str())) != NULL) {
+    while ((ent = readdir(dir)) != NULL) {
+      if(ent->d_type == DT_REG) {
+        std::string name = ent->d_name;
+        // Check that file ends with .path
+        if (name.length() > raw_path_ending.length() && name.compare(name.length() - raw_path_ending.length(), raw_path_ending.length(), raw_path_ending)) {
+          
+          // Read path way points into trajectory
+          // https://github.com/wpilibsuite/PathWeaver/blob/bbba553201b24fff8e23509b0af7104f0bde3a35/src/main/java/edu/wpi/first/pathweaver/spline/wpilib/WpilibSpline.java
+          // https://github.com/wpilibsuite/PathWeaver/blob/bbba553201b24fff8e23509b0af7104f0bde3a35/src/main/java/edu/wpi/first/pathweaver/Waypoint.java#L25
+          frc::Trajectory trajectory = frc::TrajectoryGenerator(, config);
+          wpi::SmallString<128> json_path(deployDirectory);
+          json_path.append(name.substr(0, name.length() - raw_path_ending.length()) + ".wpilib.json");
+          frc::TrajectoryUtil::ToPathweaverJson(trajectory, json_path);
+        }        
+      }
+    }
+    closedir(dir);
+  }
+
   if ((dir = opendir(paths_dir.c_str())) != NULL) {
     while ((ent = readdir(dir)) != NULL) {
       if(ent->d_type == DT_REG) {

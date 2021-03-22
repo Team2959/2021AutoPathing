@@ -72,6 +72,7 @@
     "cinttypes": "cpp",
     "typeinfo": "cpp",
     "numeric": "cpp",
-    "random": "cpp"
+    "random": "cpp",
+    "math": "cpp"
   }
 }
