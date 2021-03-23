@@ -20,6 +20,8 @@
 // #include <experimental/filesystem>
 #include <dirent.h>
 #include <thread>
+#include <iostream>
+#include <sstream>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -39,8 +41,8 @@ void Robot::RobotInit() {
   std::string raw_path_ending = ".path";
 
   frc::TrajectoryConfig config(Drive::kMaxSpeed, Drive::kMaxAcceleration);
-  config.SetStartVelocity(0_ms);
-  config.SetEndVelocity(0_ms);
+  config.SetStartVelocity(0_mps);
+  config.SetEndVelocity(0_mps);
   
   frc::CentripetalAccelerationConstraint constraint(Drive::kMaxCentripetalAcceleration);
 
@@ -69,8 +71,38 @@ void Robot::RobotInit() {
           // Read path way points into trajectory
           // https://github.com/wpilibsuite/PathWeaver/blob/bbba553201b24fff8e23509b0af7104f0bde3a35/src/main/java/edu/wpi/first/pathweaver/spline/wpilib/WpilibSpline.java
           // https://github.com/wpilibsuite/PathWeaver/blob/bbba553201b24fff8e23509b0af7104f0bde3a35/src/main/java/edu/wpi/first/pathweaver/Waypoint.java#L25
-          
-          frc::Trajectory trajectory = frc::TrajectoryGenerator(, config);
+
+          std::ifstream csv_file;
+          csv_file.open(name);
+
+          if (!csv_file.good() || !csv_file.is_open())
+            continue;
+
+          std::string line;
+          std::getline(csv_file, line); // First header row
+
+          std::vector<frc::Spline<5>::ControlVector> controlVectors;
+          bool reversed = false;
+          while (std::getline(csv_file, line)) {
+            std::stringstream iss(line);
+            std::string cell;
+
+            std::getline(iss, cell, ',');
+            double x = std::stod(cell);
+            std::getline(iss, cell, ',');
+            double y = std::stod(cell);
+            std::getline(iss, cell, ',');
+            double xtangent = std::stod(cell);
+            std::getline(iss, cell, ',');
+            double ytangent = std::stod(cell);
+            std::getline(iss, cell, ','); // Fixed Theta
+            std::getline(iss, cell, ',');
+            reversed = reversed || (cell == "true");
+
+            controlVectors.push_back({std::array<double, 3>{x, xtangent, 0}, std::array<double, 3>{y,ytangent,0}});
+          }
+          config.SetReversed(reversed);
+          frc::Trajectory trajectory = frc::TrajectoryGenerator::GenerateTrajectory(controlVectors, config);
           wpi::SmallString<128> json_path(deployDirectory);
           json_path.append(name.substr(0, name.length() - raw_path_ending.length()) + ".wpilib.json");
           frc::TrajectoryUtil::ToPathweaverJson(trajectory, json_path);
