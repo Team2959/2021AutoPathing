@@ -33,8 +33,10 @@
 
 void Robot::RobotInit() {
   m_container.RobotInit();
-  m_autoChooser.SetName("Special Auto Modes");
+  m_autoChooser.SetName("Auto Mode");
   m_autoChooser.AddOption("Bounce", "Bounce");
+  m_autoChooser.AddOption("FixedGalacticRed", "FixedGalacticRed");
+  m_autoChooser.AddOption("FixedGalacticBlue", "FixedGalacticBlue");
 
   std::string paths_dir = "/home/lvuser/deploy/paths";
   std::string raw_path_dir = "/home/lvuser/deploy/raw_paths";
@@ -57,7 +59,7 @@ void Robot::RobotInit() {
 
   wpi::SmallString<128> deployDirectory;
   frc::filesystem::GetDeployDirectory(deployDirectory);
-  wpi::sys::path::append(deployDirectory, "paths");
+  //wpi::sys::path::append(deployDirectory, "paths");
 
   DIR *dir;
   struct dirent *ent;
@@ -66,18 +68,24 @@ void Robot::RobotInit() {
       if(ent->d_type == DT_REG) {
         std::string name = ent->d_name;
         // Check that file ends with .path
-        if (name.length() > raw_path_ending.length() && name.compare(name.length() - raw_path_ending.length(), raw_path_ending.length(), raw_path_ending)) {
+        
+        if (name.length() > raw_path_ending.length() && name.compare(name.length() - raw_path_ending.length(), raw_path_ending.length(), raw_path_ending) == 0) {
           
           // Read path way points into trajectory
           // https://github.com/wpilibsuite/PathWeaver/blob/bbba553201b24fff8e23509b0af7104f0bde3a35/src/main/java/edu/wpi/first/pathweaver/spline/wpilib/WpilibSpline.java
           // https://github.com/wpilibsuite/PathWeaver/blob/bbba553201b24fff8e23509b0af7104f0bde3a35/src/main/java/edu/wpi/first/pathweaver/Waypoint.java#L25
-
+          
+          wpi::SmallString<128> csv_path(deployDirectory);
+          wpi::sys::path::append(csv_path, "raw_paths");
+          wpi::sys::path::append(csv_path, name);
           std::ifstream csv_file;
-          csv_file.open(name);
+          csv_file.open(csv_path.c_str());
 
-          if (!csv_file.good() || !csv_file.is_open())
+          if (!csv_file.good() || !csv_file.is_open()) {
+            std::cout << "Failed to open: " << csv_path.c_str() << std::endl;
             continue;
-
+          }
+          
           std::string line;
           std::getline(csv_file, line); // First header row
 
@@ -104,7 +112,9 @@ void Robot::RobotInit() {
           config.SetReversed(reversed);
           frc::Trajectory trajectory = frc::TrajectoryGenerator::GenerateTrajectory(controlVectors, config);
           wpi::SmallString<128> json_path(deployDirectory);
-          json_path.append(name.substr(0, name.length() - raw_path_ending.length()) + ".wpilib.json");
+          wpi::sys::path::append(json_path, "paths");
+          wpi::sys::path::append(json_path, (name.substr(0, name.length() - raw_path_ending.length()) + ".wpilib.json"));
+          remove(json_path.c_str());
           frc::TrajectoryUtil::ToPathweaverJson(trajectory, json_path);
         }        
       }
@@ -123,13 +133,15 @@ void Robot::RobotInit() {
     closedir(dir);
   }
 
-  m_autoChooser.SetName("Auto Mode");
   // for (auto& entry : fs::directory_iterator(paths_dir)) {
   //     m_autoChooser.AddOption(entry.path().filename().string(), entry.path().filename().string());
   // }
   frc::SmartDashboard::PutData(&m_autoChooser); 
 
   frc::SmartDashboard::PutBoolean("Curvature Drive", true);
+  frc::SmartDashboard::PutNumber("Auto Max Velocity", Drive::kMaxSpeed.to<double>());
+  frc::SmartDashboard::PutNumber("Auto Max Acceleration", Drive::kMaxAcceleration.to<double>());
+  frc::SmartDashboard::PutNumber("Auto Max Centripetal Acceleration", Drive::kMaxCentripetalAcceleration.to<double>());
   //StartNewLogFile();
   frc::SmartDashboard::PutNumber("Drive/Deadband",.1);
   frc::SmartDashboard::PutNumber("Drive/Exponent",2.5);
@@ -179,6 +191,42 @@ void Robot::AutonomousInit() {
   if(file == "Bounce")
   {
       m_autonomousCommand = m_container.BouncePathAuto();
+  }
+  else if(file == "FixedGalacticRed")
+  {
+    if (m_Count % 2 == 0)
+    {
+      file = "GalacticSearchA_Red.wpilib.json";
+    }
+    else
+    {
+      file = "GalacticSearchB_Red.wpilib.json";
+    }
+
+      wpi::Twine twine{file};
+      wpi::SmallString<64> smallString;
+      twine.toVector(smallString);
+      std::cout << smallString << std::endl;
+      m_autonomousCommand = m_container.GetPathingCommand(smallString);
+      m_Count++;
+  }
+  else if(file == "FixedGalacticBlue")
+  {
+    if (m_Count % 2 == 0)
+    {
+      file = "GalacticSearchA_Blue.wpilib.json";
+    }
+    else
+    {
+      file = "GalacticSearchB_Blue.wpilib.json";
+    }
+
+      wpi::Twine twine{file};
+      wpi::SmallString<64> smallString;
+      twine.toVector(smallString);
+      std::cout << smallString << std::endl;
+      m_autonomousCommand = m_container.GetPathingCommand(smallString);
+      m_Count++;
   }
   else
   {

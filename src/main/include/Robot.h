@@ -37,4 +37,5 @@ class Robot : public frc::TimedRobot {
   frc::SendableChooser<std::string> m_autoChooser;
 
   RobotContainer m_container;
+  int m_Count = 0;
 };

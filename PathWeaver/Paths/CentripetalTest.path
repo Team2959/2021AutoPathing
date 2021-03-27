@@ -1,0 +1,6 @@
+X,Y,Tangent X,Tangent Y,Fixed Theta,Reversed,Name
+0.8,-2.25,1.0,0.0,true,false,
+6.0,-2.25,1.0,0.0,true,false,
+7.0,-3.0,0.0,-1.0,true,false,
+6.0,-3.75,-1.0,0.0,true,false,
+0.8,-3.75,-1.0,0.0,true,false,
