@@ -16,6 +16,6 @@ void KickerPowercellCommand::Initialize()
 {
     if(m_intake.IsIntakeRunning())
     {
-        m_intake.SetIntakeSpeed(0);
+        m_intake.SetKickerSpeed(0);
     }   
 }

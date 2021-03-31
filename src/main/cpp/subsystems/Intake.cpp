@@ -202,7 +202,7 @@ void Intake::SetFeedingState(Intake::FeedingState state) {
 
 void Intake::IncrementPowercellCount()
 {
-    m_powercellCount++;
+    // m_powercellCount++;
 }
 
 void Intake::ResetPowercellCount()
